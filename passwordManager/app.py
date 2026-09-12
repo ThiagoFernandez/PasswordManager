@@ -7,8 +7,8 @@ def checkInactivity(t):
     if time.time() - t >= timeout:
         print("Session expired. Please login again")
         return userSelector()
-    
-    return 
+
+    return
 
 def showPageApp(a):
     cont = 0
@@ -22,7 +22,7 @@ def showPageApp(a):
                 break
             elif pageApp == -2:
                 print("back to the main menu")
-                return pageApp
+                break
             else:
                 print("Invalid option, please try again.")
         except ValueError:
@@ -55,13 +55,13 @@ def userSelector():
                 print("Please, the option must be between 1-2")
         except ValueError:
             print("The option must be a number")
-    
+
     if option == 1:
         while True:
             print("Who are you?")
             cont = 1
-            for user in users: 
-                print(f"{cont}. {user}") 
+            for user in users:
+                print(f"{cont}. {user}")
                 cont+=1
             print(f"{cont}. Exit")
             try:
@@ -84,7 +84,7 @@ def userSelector():
 
         attempt = 0
         while True:
-            if attempt != 3:  
+            if attempt != 3:
                 checkPassword = pwinput.pwinput(prompt="Write your user password: ", mask="*")
                 hashPass = hashlib.sha256(checkPassword.encode("utf-8")).hexdigest()
                 if hashPass == data[tempActiveUser]["userPassword"]:
@@ -196,7 +196,7 @@ def addAccount(a):
         "username": newUsername,
         "email": newEmail,
         "password": encryptedPassword,
-        **extra_fields   
+        **extra_fields
     }
 
     print("\nNew account has been created:", newAccount)
@@ -218,13 +218,13 @@ def changePassword(a):
         else:
             print(f"{data[a]["accounts"][pageApp]}\nIs this the account you want to change the password?")
             option = input("yes or no: ").strip().lower()
-    
+
             if option=="yes":
                 newPassword = input("Write the new password: ")
                 while newPassword=="":
                     newPassword = input(f"The password cannot be empty\nWrite the new password: ")
                 cipherNewPassword= cipher.encrypt(newPassword.encode()).decode()
-                data[a]["accounts"][pageApp]["password"] = cipherNewPassword 
+                data[a]["accounts"][pageApp]["password"] = cipherNewPassword
                 print(f"Result: {data[a]["accounts"][pageApp]}")
                 confirm = input(f"Do you want to confirm?\nyes or no: ").strip().lower()
                 with open("../../dataNoTocar.json", "w") as f:
@@ -261,7 +261,7 @@ def createPassword(a):
             cont = 0
             for i in data[a]["accounts"]:
                 cont += 1
-           
+
                 print(f"{cont}. {data[a]["accounts"][cont-1]['page/app']}")
             while True:
                 try:
@@ -271,7 +271,7 @@ def createPassword(a):
                     else:
                         print("Invalid option, please try again.")
                 except ValueError:
-                    print("The option must be a number") 
+                    print("The option must be a number")
             cipherRandomPassword = cipher.encrypt(randomPassword.encode()).decode()
             data[a]["accounts"][pageApp]["password"] = cipherRandomPassword
             print(f"result: {data[a]["accounts"][pageApp]}")
@@ -281,7 +281,7 @@ def createPassword(a):
         else:
             return print("back to the main menu")
 
-    else:        
+    else:
         while True:
             passwordCreated = input("\nWrite your new password: ")
 
@@ -302,11 +302,13 @@ def createPassword(a):
                 break
             else:
                 print("Weak password, please try again.")
-    
+
         option = input("Do you want to use it?\nyes or no: ").strip().lower()
         if option=="yes":
             print("Choose the page or app")
             pageApp = showPageApp(activeUser)
+            if pageApp == -2: # lazy fix
+                return
             cypherPasswordCreated = cipher.encrypt(passwordCreated.encode()).decode()
             data[a]["accounts"][pageApp]["password"] = cypherPasswordCreated
             print(f"result: {data[a]["accounts"][pageApp]}")
@@ -320,10 +322,12 @@ def createPassword(a):
 def deleteAccount(a):
     print(f"{'Welcome to the password deleter':-^60}\nFor what page do you want to delete a password?: ")
     pageApp = showPageApp(activeUser)
+    if pageApp == -2:
+        return # lazy fix
     print(f"{data[a]["accounts"][pageApp]}\nIs this the account you want to delete?")
     option = input("yes or no: ").strip().lower()
     if option == "yes":
-        del data[a]["accounts"][pageApp] 
+        del data[a]["accounts"][pageApp]
         option = input(f"Do you want to confirm the changes?\nyes or no: ").strip().lower()
         if option == "yes":
             with open("../../dataNoTocar.json", "w") as f:
