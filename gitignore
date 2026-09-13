@@ -1,0 +1,25 @@
+# Bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Entornos virtuales
+.venv/
+venv/
+env/
+
+# Editores e IDEs
+.vscode/
+.idea/
+*.swp
+
+# Archivos del sistema
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Secretos y datos del usuario: NUNCA commitear.
+# La clave Fernet descifra todo el archivo de cuentas.
+key.key
+*.key
+dataNoTocar.json

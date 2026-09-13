@@ -1,0 +1,2 @@
+pwinput>=1.0.3          # enmascara la contraseña maestra al tipearla
+cryptography>=45.0.0    # Fernet: AES-128-CBC + HMAC-SHA256

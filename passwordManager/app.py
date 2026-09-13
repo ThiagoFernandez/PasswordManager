@@ -73,7 +73,7 @@ def userSelector():
                 User = int(input(f"Choose an option between 1 - {len(users)}: "))
                 if User == cont:
                     return "exit"
-                if User == 0:
+                elif User <1:
                     print(f"Choose an option between 1 - {len(users)}: ")
                     continue
                 else:
@@ -376,7 +376,7 @@ try:
 except FileNotFoundError:
     print("No data file found. Creating a new one...")
     data = {}
-    with open("../../dataNoTocar.json", "w") as f:
+    with open(DATA_FILE, "w") as f:
         json.dump(data, f, indent=4)
 except json.JSONDecodeError:
     print("Empty file, starting...")
@@ -403,38 +403,39 @@ print(activeUser)
 #main menu
 if activeUser != "exit":
     while True:
-        activeUser = checkInactivity(lastAction, activeUser)
-        if activeUser == "exit":
-            break
-        lastAction = time.time()
         print(f"{'MAIN MENU':-^19}")
-        print("1. Search a password\n2. Add an account\n3. Change a password\n4. Create a password\n5. Delete a password\n6. Hash a password\n7. All the passwords\n8. Exit")
+        print("1. Search a password\n2. Add an account\n3. Change a password\n4. Create a password\n5. Delete a password\n6. All the passwords\n7. Exit")
 
-        match optionSelector():
+        opcion = optionSelector()
+
+        nuevo = checkInactivity(lastAction, activeUser)
+        if nuevo in ("exit", "banned"):
+            break
+        if nuevo != activeUser:
+            activeUser = nuevo
+            lastAction = time.time()
+            continue
+        match opcion:
             case 1:
                 print("1. You've selected the option 1 - Search a password")
                 searchPassword(activeUser)
-                lastAction = time.time()
             case 2:
                 print("2. You've selected the option 2 - Add an account")
                 addAccount(activeUser)
-                lastAction = time.time()
             case 3:
                 print("3. You've selected the option 3 - Change a password")
                 changePassword(activeUser)
-                lastAction = time.time()
             case 4:
                 print("4. You've selected the option 4 - Create a password")
                 createPassword(activeUser)
-                lastAction = time.time()
             case 5:
                 print("5. You've selected the option 5 - Delete an account")
                 deleteAccount(activeUser)
-                lastAction = time.time()
             case 6:
                 print("6. You've selected the option 6 - All the passwords")
                 allThePasswords(activeUser)
-                lastAction = time.time()
             case 7:
                 print("7. You've selected the option 7 - Exit")
                 break
+
+        lastAction = time.time()
