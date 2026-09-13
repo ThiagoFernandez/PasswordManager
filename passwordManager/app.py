@@ -1,14 +1,19 @@
 #LIBRERIAS
-import random, json, string, hashlib, pwinput, time, datetime
+import json, string, hashlib, pwinput, time, datetime, secrets
 from cryptography.fernet import Fernet
+from pathlib import Path
 
-def checkInactivity(t):
+BASE_DIR = Path(__file__).resolve().parent
+DATA_FILE = BASE_DIR.parent / "dataNoTocar.json"
+KEY_FILE = BASE_DIR.parent / "key.key"
+
+def checkInactivity(t, active):
     timeout = 60 # cambialo como vos quieras gordito
     if time.time() - t >= timeout:
         print("Session expired. Please login again")
         return userSelector()
 
-    return
+    return active
 
 def showPageApp(a):
     cont = 0
@@ -34,9 +39,9 @@ def showPageApp(a):
 def optionSelector():
     while True:
         try:
-            option = int(input("Choose an option between 1-8: "))
-            while option not in[1, 2, 3, 4, 5, 6, 7, 8]:
-                option = int(input("INVALID OPTION | TRY AGAIN\nChoose an option between 1-8: "))
+            option = int(input("Choose an option between 1-7: "))
+            while option not in[1, 2, 3, 4, 5, 6, 7]:
+                option = int(input("INVALID OPTION | TRY AGAIN\nChoose an option between 1-7: "))
             break
         except ValueError:
             print("The option must be a number")
@@ -68,13 +73,17 @@ def userSelector():
                 User = int(input(f"Choose an option between 1 - {len(users)}: "))
                 if User == cont:
                     return "exit"
-                tempActiveUser = users[User-1]
+                if User == 0:
+                    print(f"Choose an option between 1 - {len(users)}: ")
+                    continue
+                else:
+                    tempActiveUser = users[User-1]
                 if time.time() < data[tempActiveUser]["banUntil"]:
                     banTime=datetime.datetime.fromtimestamp(data[tempActiveUser]["banUntil"])
                     print(f"User's still banned\nBan until {banTime.strftime('%Y-%m-%d %H:%M:%S')}\nTry another user")
                 else:
                     data[tempActiveUser]["banUntil"] = 0
-                    with open("../../dataNoTocar.json", "w") as f:
+                    with open(DATA_FILE, "w") as f:
                         json.dump(data, f, indent=4)
                     break
             except ValueError:
@@ -96,7 +105,7 @@ def userSelector():
                 ban = datetime.datetime.now() + datetime.timedelta(minutes= 5)
                 banTs = int(ban.timestamp())
                 data[tempActiveUser]["banUntil"] = banTs
-                with open("../../dataNoTocar.json", "w") as f:
+                with open(DATA_FILE, "w") as f:
                     json.dump(data, f, indent=4)
                 print(f"BANHAMMER!\n5 minutes ban")
                 return "banned"
@@ -112,9 +121,10 @@ def userSelector():
                 hashpass = hashlib.sha256(newPass.encode("utf-8")).hexdigest()
                 data[newUser] = {
                     "userPassword": hashpass,
-                    "accounts": []
+                    "accounts": [],
+                    "banUntil":0
                 }
-                with open("../../dataNoTocar.json", "w") as f:
+                with open(DATA_FILE, "w") as f:
                     json.dump(data, f, indent=4)
                 tempActiveUser = newUser
                 return tempActiveUser
@@ -123,12 +133,12 @@ def userSelector():
 # CLAVES Y CIFRADO
 def saveKey(): #llamarla solo la primera vez que usas el programa
     key = Fernet.generate_key()
-    with open("key.key", "wb") as f:
+    with open(KEY_FILE, "wb") as f:
         f.write(key)
 
 def loadKey():
     """Carga la clave desde el archivo key.key"""
-    with open("key.key", "rb") as f:
+    with open(KEY_FILE, "rb") as f:
         return f.read()
 
 #/////////////////////////////
@@ -203,7 +213,7 @@ def addAccount(a):
     option = input("Do you want to save it?\nyes or no: ").strip().lower()
     if option == "yes":
         data[a]["accounts"].append(newAccount)
-        with open("../../dataNoTocar.json", "w") as f:
+        with open(DATA_FILE, "w") as f:
             json.dump(data, f, indent=4)
         print("The account has been saved")
     return print("back to the main menu")
@@ -224,35 +234,46 @@ def changePassword(a):
                 while newPassword=="":
                     newPassword = input(f"The password cannot be empty\nWrite the new password: ")
                 cipherNewPassword= cipher.encrypt(newPassword.encode()).decode()
-                data[a]["accounts"][pageApp]["password"] = cipherNewPassword
-                print(f"Result: {data[a]["accounts"][pageApp]}")
                 confirm = input(f"Do you want to confirm?\nyes or no: ").strip().lower()
-                with open("../../dataNoTocar.json", "w") as f:
-                    json.dump(data, f, indent=4)
-                print("The password has been changed and saved")
+                if confirm == "yes":
+                    data[a]["accounts"][pageApp]["password"] = cipherNewPassword
+                    print(f"Result: {data[a]["accounts"][pageApp]}")
+                    with open(DATA_FILE, "w") as f:
+                        json.dump(data, f, indent=4)
+                    print("The password has been changed and saved")
                 return print("back to the main menu")
 
 
 #option 4
+def generate_password(length):
+    if length < 4:
+        raise ValueError("Password length must be at least 4")
+
+    characters = string.ascii_letters + string.digits + string.punctuation
+
+    password = [
+        secrets.choice(string.ascii_uppercase),
+        secrets.choice(string.ascii_lowercase),
+        secrets.choice(string.digits),
+        secrets.choice(string.punctuation)
+    ]
+
+    password += [
+        secrets.choice(characters)
+        for i in range(length - 4)
+    ]
+
+    secrets.SystemRandom().shuffle(password)
+
+    return ''.join(password)
+
 def createPassword(a):
     print(f"{'Welcome to the passwordCreator':-^60}\nFor what page do you want to create a password?: ")
     print(f"These are some rules to create a password:\n1. Include highercase\n2. Include lowercase\n3. Include symbols(ex:@, #, &, $)\n4. Minimun lenght of 12 characters\n5. Include numbers")
     mode = input("Do you want to us to randomize the password?\nyes or no: ").strip().lower()
 
     if mode == "yes":
-        randomPassword = [
-            random.choice(string.ascii_uppercase),
-            random.choice(string.ascii_lowercase),
-            random.choice(string.digits),
-            random.choice(string.punctuation)
-    ]
-
-        todos = string.ascii_letters + string.digits + string.punctuation
-        while len(randomPassword) < 12:
-            randomPassword.append(random.choice(todos))
-
-        random.shuffle(randomPassword)
-        randomPassword = "".join(randomPassword)
+        randomPassword = generate_password(16)
 
         print(f"Result: {randomPassword}")
         option = input("Do you want to use it?\nyes or no: ").strip().lower()
@@ -263,6 +284,9 @@ def createPassword(a):
                 cont += 1
 
                 print(f"{cont}. {data[a]["accounts"][cont-1]['page/app']}")
+            if cont == 0:
+                print("There are 0 accounts created | Back to the main menu")
+                return
             while True:
                 try:
                     pageApp = int(input(f"Choose an option between 1 - {cont}: ")) - 1
@@ -275,7 +299,7 @@ def createPassword(a):
             cipherRandomPassword = cipher.encrypt(randomPassword.encode()).decode()
             data[a]["accounts"][pageApp]["password"] = cipherRandomPassword
             print(f"result: {data[a]["accounts"][pageApp]}")
-            with open("../../dataNoTocar.json", "w") as f:
+            with open(DATA_FILE, "w") as f:
                 json.dump(data, f, indent=4)
             return print("back to the main menu")
         else:
@@ -312,7 +336,7 @@ def createPassword(a):
             cypherPasswordCreated = cipher.encrypt(passwordCreated.encode()).decode()
             data[a]["accounts"][pageApp]["password"] = cypherPasswordCreated
             print(f"result: {data[a]["accounts"][pageApp]}")
-            with open("../../dataNoTocar.json", "w") as f:
+            with open(DATA_FILE, "w") as f:
                 json.dump(data, f, indent=4)
             return print("back to the main menu")
         else:
@@ -327,10 +351,10 @@ def deleteAccount(a):
     print(f"{data[a]["accounts"][pageApp]}\nIs this the account you want to delete?")
     option = input("yes or no: ").strip().lower()
     if option == "yes":
-        del data[a]["accounts"][pageApp]
         option = input(f"Do you want to confirm the changes?\nyes or no: ").strip().lower()
         if option == "yes":
-            with open("../../dataNoTocar.json", "w") as f:
+            del data[a]["accounts"][pageApp]
+            with open(DATA_FILE, "w") as f:
                 json.dump(data, f, indent=4)
             print("The change has been done")
     return print("back to the main menu")
@@ -347,7 +371,7 @@ def allThePasswords(a):
 
 #start
 try:
-    with open("../../dataNoTocar.json", "r") as f:
+    with open(DATA_FILE, "r") as f:
         data = json.load(f)
 except FileNotFoundError:
     print("No data file found. Creating a new one...")
@@ -379,43 +403,38 @@ print(activeUser)
 #main menu
 if activeUser != "exit":
     while True:
+        activeUser = checkInactivity(lastAction, activeUser)
+        if activeUser == "exit":
+            break
+        lastAction = time.time()
         print(f"{'MAIN MENU':-^19}")
         print("1. Search a password\n2. Add an account\n3. Change a password\n4. Create a password\n5. Delete a password\n6. Hash a password\n7. All the passwords\n8. Exit")
 
         match optionSelector():
             case 1:
-                checkInactivity(lastAction)
                 print("1. You've selected the option 1 - Search a password")
                 searchPassword(activeUser)
                 lastAction = time.time()
             case 2:
-                checkInactivity(lastAction)
                 print("2. You've selected the option 2 - Add an account")
                 addAccount(activeUser)
                 lastAction = time.time()
             case 3:
-                checkInactivity(lastAction)
                 print("3. You've selected the option 3 - Change a password")
                 changePassword(activeUser)
                 lastAction = time.time()
             case 4:
-                checkInactivity(lastAction)
                 print("4. You've selected the option 4 - Create a password")
                 createPassword(activeUser)
                 lastAction = time.time()
             case 5:
-                checkInactivity(lastAction)
                 print("5. You've selected the option 5 - Delete an account")
                 deleteAccount(activeUser)
                 lastAction = time.time()
             case 6:
-                print("6. You've selected the option 6 - Hash a password")
-                #no me convence
-            case 7:
-                checkInactivity(lastAction)
-                print("7. You've selected the option 7 - All the passwords")
+                print("6. You've selected the option 6 - All the passwords")
                 allThePasswords(activeUser)
                 lastAction = time.time()
-            case 8:
-                print("8. You've selected the option 8 - Exit")
+            case 7:
+                print("7. You've selected the option 7 - Exit")
                 break
