@@ -13,13 +13,41 @@ MINIMUM_LENGTH = 12
 MAXIMUM_LENGTH = 64
 MAX_LOGIN_ATTEMPTS = 3
 BAN_TIME = 300 # Tiempo de ban en segundos (5 minutos)
+AMOUNT_CHARACTERS = 4 # Cantidad de caracteres que se asegura que estén presentes en la contraseña generada (1 mayúscula, 1 minúscula, 1 número, 1 símbolo)
 
 # funciones sueltas
-def validate_password(password) -> dict[str, bool]:
-    pass
+def validate_password(password: str) -> dict[str, bool]:
+    rules = {
+                    "At least one uppercase": any(c.isupper() for c in password),
+                    "At least one lowercase": any(c.islower() for c in password),
+                    "At least one number": any(c.isdigit() for c in password),
+                    "At least one symbol": any(c in string.punctuation for c in password),
+                    "Minimum length of 12": len(password) >= MINIMUM_LENGTH,
+                    "Maximum length of 64": len(password) <= MAXIMUM_LENGTH
+                }
+    return rules
 
-def generate_password(length=MINIMUM_LENGTH) -> str:
-    pass
+def generate_password(length: int = MINIMUM_LENGTH) -> str:
+    if length < MINIMUM_LENGTH or length > MAXIMUM_LENGTH:
+            raise ValueError(f"Password length must be between {MINIMUM_LENGTH} and {MAXIMUM_LENGTH} characters.")
+
+    characters = string.ascii_letters + string.digits + string.punctuation
+
+    password = [
+        secrets.choice(string.ascii_uppercase),
+        secrets.choice(string.ascii_lowercase),
+        secrets.choice(string.digits),
+        secrets.choice(string.punctuation)
+    ]
+
+    password += [
+        secrets.choice(characters)
+        for _ in range(length - AMOUNT_CHARACTERS)
+    ]
+
+    secrets.SystemRandom().shuffle(password)
+
+    return ''.join(password)
 
 
 # clase 
