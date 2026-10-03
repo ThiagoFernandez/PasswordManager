@@ -1,3 +1,5 @@
+from datetime import datetime
+
 class VaultException(Exception):
     """Clase base para todas las excepciones del gestor de contraseñas."""
     pass
@@ -30,10 +32,6 @@ class BannedUserException(VaultException):
 
 class AccountNotFoundException(VaultException):
     """Excepción lanzada cuando una cuenta no es encontrada."""
-    pass
-
-class AccountExistsException(VaultException):
-    """Excepción lanzada cuando una cuenta ya existe."""
     pass
 
 class InvalidUsernameException(VaultException):
