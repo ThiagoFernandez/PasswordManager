@@ -8,7 +8,7 @@ import os
 
 from cryptography.fernet import Fernet
 from pathlib import Path
-from datetime import datetime, timedelta
+from datetime import datetime, time, timedelta
 
 MINIMUM_LENGTH = 12
 MAXIMUM_LENGTH = 64
@@ -67,8 +67,37 @@ class PasswordVault:
 
     # metodos publicos
 
-    def login(self, user:str, password:str) -> None: 
-        pass
+    def login(self, user: str, password: str) -> None:
+        if user not in self.data:
+            raise exceptions.UserNotFoundException(user)
+
+        if self.data[user]["banUntil"] > datetime.now().timestamp():
+            ban_until = datetime.fromtimestamp(self.data[user]["banUntil"])
+            raise exceptions.BannedUserException(ban_until)
+
+        password_hash = hashlib.sha256(password.encode("utf-8")).hexdigest()
+
+        if self.data[user]["userPassword"] != password_hash:
+            self.data[user]["login_attempts"] += 1
+            
+            if self.data[user]["login_attempts"] >= MAX_LOGIN_ATTEMPTS:
+                self.data[user]["banUntil"] = (
+                    datetime.now() + timedelta(seconds=BAN_TIME)
+                ).timestamp()
+                self.data[user]["login_attempts"] = 0
+
+                self._save_data()
+                raise exceptions.BannedUserException(
+                    datetime.fromtimestamp(self.data[user]["banUntil"])
+                )
+
+            self._save_data()
+            raise exceptions.WrongPasswordException(MAX_LOGIN_ATTEMPTS - self.data[user]["login_attempts"])
+
+        self.data[user]["login_attempts"] = 0
+        self._save_data()
+
+        
 
     def list_users(self) -> list[str]:
         return list(self.data.keys())
@@ -161,11 +190,23 @@ class PasswordVault:
         changed = False
 
         for user_data in self.data.values():
-            user_data["accounts"] = user_data.get("accounts", [])
+            if "login_attempts" not in user_data:
+                user_data["login_attempts"] = 0
+                changed = True
+
+            if "banUntil" not in user_data:
+                user_data["banUntil"] = 0
+                changed = True
+
+            if "accounts" not in user_data:
+                user_data["accounts"] = []
+                changed = True
+
             for account in user_data["accounts"]:
                 if "id" not in account:
                     account["id"] = str(uuid.uuid4())
                     changed = True
 
         return changed
+
 
