@@ -53,3 +53,37 @@ class EmptyFieldException(VaultException):
 
         super().__init__(f"The field '{field_name}' cannot be empty.")
         self.field_name = field_name
+
+class BrokenJsonFileException(VaultException):
+    """Excepción lanzada cuando el archivo JSON está roto o malformado."""
+    # distingue de archivo vacio, que es un caso aparte y no es un error de formato
+
+    def __init__(self, file_path):
+
+        super().__init__(f"The JSON file at '{file_path}' is broken or malformed.")
+        self.file_path = file_path
+
+class MissingKeyFileException(VaultException):
+    """Excepción lanzada cuando falta el archivo de clave."""
+    
+    def __init__(self, key_path):
+
+        super().__init__(f"The key file at '{key_path}' is missing.")
+        self.key_path = key_path
+
+class BrokenKeyFileException(VaultException):
+    """Excepción lanzada cuando el archivo de clave está roto o malformado."""
+    
+    def __init__(self, key_path):
+
+        super().__init__(f"The key file at '{key_path}' is broken or malformed.")
+        self.key_path = key_path
+
+class CannotSaveDataException(VaultException):
+    """Excepción lanzada cuando no se puede guardar el archivo de datos."""
+    
+    def __init__(self, data_path, original_exception):
+
+        super().__init__(f"Cannot save data to '{data_path}': {original_exception}")
+        self.data_path = data_path
+        self.original_exception = original_exception
