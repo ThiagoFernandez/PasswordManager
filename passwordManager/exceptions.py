@@ -8,7 +8,7 @@ class UserNotFoundException(VaultException):
     """Excepción lanzada cuando un usuario no es encontrado."""
     pass
 
-class UserExistsException(VaultException):
+class UserAlreadyExistsException(VaultException):
     """Excepción lanzada cuando un usuario ya existe."""
     pass
 

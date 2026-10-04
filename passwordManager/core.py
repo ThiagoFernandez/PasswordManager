@@ -71,8 +71,8 @@ class PasswordVault:
         pass
 
     def list_users(self) -> list[str]:
-        pass
-
+        return list(self.data.keys())
+        
     def list_accounts(self, user:str) -> list[dict]:
         pass
 
@@ -80,7 +80,23 @@ class PasswordVault:
         pass
 
     def register(self, user:str, password:str) -> None:
-        pass
+        cleaned_user = user.strip()
+        if cleaned_user == "":
+            raise exceptions.EmptyFieldException("username")
+        if cleaned_user in self.data:
+            raise exceptions.UserAlreadyExistsException(cleaned_user)
+        
+        broken_rules = [rule for rule, passed in validate_password(password).items() if not passed]
+        if broken_rules:
+            raise exceptions.WeakPasswordException(broken_rules)
+        
+        self.data[cleaned_user] = {
+            "userPassword": hashlib.sha256(password.encode("utf-8")).hexdigest(),
+            "accounts": [],
+            "login_attempts": 0,
+            "banUntil": 0
+        }
+        self._save_data()
 
     def add_account(self, user:str, app:str, username:str, email:str, password:str, type: str | None = None, region: str | None = None, rank: str | None = None) -> str: # devuelve el uuid de la cuenta creada
         pass
@@ -152,3 +168,4 @@ class PasswordVault:
                     changed = True
 
         return changed
+
