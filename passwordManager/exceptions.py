@@ -87,3 +87,7 @@ class CannotSaveDataException(VaultException):
         super().__init__(f"Cannot save data to '{data_path}': {original_exception}")
         self.data_path = data_path
         self.original_exception = original_exception
+
+class InvalidKeyException(VaultException):
+    def __init__(self):
+        super().__init__("The key file doesn't match this data")
