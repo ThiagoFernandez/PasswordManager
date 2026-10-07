@@ -1,42 +1,32 @@
 import sys
+from pathlib import Path
 
-from PySide6 import QtCore, QtWidgets
+from PySide6 import QtWidgets
+
+import core
+from login_widget import LoginWidget
 
 
-class MyWidget(QtWidgets.QWidget):
-    def __init__(self):
-        super().__init__()
-        self.cont = 0
-
-        self.button = QtWidgets.QPushButton("add")
-        self.button2 = QtWidgets.QPushButton("reset")
-        self.text = QtWidgets.QLabel("Clicks: 0",
-                                     alignment=QtCore.Qt.AlignCenter)
-        self.layout = QtWidgets.QVBoxLayout(self)
-        self.layout.addWidget(self.text)
-        self.layout.addWidget(self.button)
-        self.layout.addWidget(self.button2)
-
-        self.button.clicked.connect(self.add_number)
-        self.button2.clicked.connect(self.reset)
-
-    def add_number(self):
-        self.cont +=1
-        self._show_text(self)
-
-    def reset(self):
-        self.cont = 0
-        self._show_text(self)
-
-    def _show_text(self):
-        self.text.setText(str(self.cont))
+BASE_DIR = Path(__file__).resolve().parent
+DATA = BASE_DIR / "prueba" / "reg.json"
+KEY = BASE_DIR / "prueba" / "key_prueba.key"
 
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication([])
 
-    widget = MyWidget()
-    widget.resize(800, 600)
-    widget.show()
+    try:
+        vault = core.PasswordVault(DATA, KEY)
+    except Exception as e:
+        QtWidgets.QMessageBox.critical(
+            None,
+            "Error",
+            f"No se pudo crear el vault:\n{e}"
+        )
+        sys.exit(1)
+
+    login = LoginWidget(vault)
+    login.resize(800, 600)
+    login.show()
 
     sys.exit(app.exec())
