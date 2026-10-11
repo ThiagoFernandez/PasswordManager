@@ -1,5 +1,6 @@
 from PySide6 import QtWidgets, QtCore
 import core
+from sections.base import paint
 import exceptions
 
 
@@ -31,10 +32,11 @@ class RegisterWidget(QtWidgets.QWidget):
 
         for rule in core.validate_password("").keys():
             label = QtWidgets.QLabel(rule)
-            label.setStyleSheet("color: gray;")
+            paint(label, "muted")
             self.rule_labels[rule] = label
 
         self.button_create_user = QtWidgets.QPushButton("Create user")
+        self.button_create_user.setObjectName("primaryButton")
         self.button_create_user.clicked.connect(self.create_user)
 
         self.button_back = QtWidgets.QPushButton("Back")
@@ -57,15 +59,15 @@ class RegisterWidget(QtWidgets.QWidget):
     def update_rules(self, password: str):
         if password.strip() == "":
             for rule in self.rule_labels:
-                self.rule_labels[rule].setStyleSheet("color: gray;")
+                paint(self.rule_labels[rule], "muted")
         else:
             rules = core.validate_password(password)
 
             for rule, passed in rules.items():
                 if passed:
-                    self.rule_labels[rule].setStyleSheet("color: green;")
+                    paint(self.rule_labels[rule], "success")
                 else:
-                    self.rule_labels[rule].setStyleSheet("color: red;")
+                    paint(self.rule_labels[rule], "error")
 
     def create_user(self):
         password = self.lineedit_password.text()
@@ -99,7 +101,7 @@ class RegisterWidget(QtWidgets.QWidget):
             self._show_error(f"Error: {e}")
 
         else:
-            self.label_error.setStyleSheet("color: green;")
+            paint(self.label_error, "success")
             self.label_error.setText("User created successfully")
 
             self.lineedit_username.clear()
@@ -112,7 +114,13 @@ class RegisterWidget(QtWidgets.QWidget):
         self.back_requested.emit()
 
     def _show_error(self, text):
-        self.label_error.setStyleSheet("color: red;")
+        paint(self.label_error, "error")
         self.label_error.setText(text)
         self.lineedit_password.clear()
         self.lineedit_password_repeat.clear()
+
+    def reset(self):
+        self.label_error.clear()
+        paint(self.label_error, "")
+        self.lineedit_username.clear()
+        self.lineedit_password.clear()

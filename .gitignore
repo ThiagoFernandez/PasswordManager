@@ -24,3 +24,7 @@ key.key
 *.key
 dataNoTocar.json
 prueba/
+
+# Build del ejecutable (PyInstaller): se regenera con build_exe.bat
+build/
+dist/

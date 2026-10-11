@@ -1,0 +1,142 @@
+/*
+ * Tema oscuro del Password Manager.
+ * Paleta: fondo #16181d · superficie #20232b · borde #2e323c
+ *         acento #5b8cff · éxito #3ecf8e · error #ff6b6b · aviso #f5a524
+ *         texto #e7e9ee · texto apagado #8a90a0
+ */
+
+QWidget {
+    background: #16181d;
+    color: #e7e9ee;
+    font-family: "Segoe UI", "Inter", sans-serif;
+    font-size: 14px;
+}
+
+QStatusBar { background: #16181d; color: #8a90a0; }
+
+/* ---------- Login y registro: tarjeta centrada ---------- */
+
+QFrame#card {
+    background: #20232b;
+    border: 1px solid #2e323c;
+    border-radius: 14px;
+}
+QFrame#card QLabel, QWidget#cardContent { background: transparent; }
+QLabel#cardTitle { font-size: 22px; font-weight: 600; }
+QLabel#cardSubtitle { color: #8a90a0; }
+
+/* ---------- Campos ---------- */
+
+QLineEdit, QComboBox {
+    background: #16181d;
+    border: 1px solid #2e323c;
+    border-radius: 8px;
+    padding: 8px 10px;
+    selection-background-color: #5b8cff;
+}
+QLineEdit:focus, QComboBox:focus { border: 1px solid #5b8cff; }
+QLineEdit:disabled, QComboBox:disabled { color: #8a90a0; border-color: #20232b; }
+QComboBox::drop-down { border: none; width: 24px; }
+QComboBox QAbstractItemView {
+    background: #20232b;
+    border: 1px solid #2e323c;
+    selection-background-color: #5b8cff;
+}
+
+/* ---------- Botones ---------- */
+
+QPushButton {
+    background: #2e323c;
+    border: none;
+    border-radius: 8px;
+    padding: 9px 16px;
+}
+QPushButton:hover { background: #3a3f4b; }
+QPushButton:pressed { background: #262a32; }
+QPushButton:focus { outline: none; border: 1px solid #5b8cff; }
+QPushButton:disabled { color: #5c6170; background: #20232b; }
+
+QPushButton#primaryButton { background: #5b8cff; color: #ffffff; font-weight: 600; }
+QPushButton#primaryButton:hover { background: #7aa2ff; }
+QPushButton#primaryButton:disabled { background: #2e3a5c; color: #8a90a0; }
+
+QPushButton#dangerButton { background: #3a2226; color: #ff6b6b; font-weight: 600; }
+QPushButton#dangerButton:hover { background: #ff6b6b; color: #16181d; }
+
+QPushButton#smallButton { padding: 5px 10px; font-size: 12px; border-radius: 6px; }
+QPushButton#smallButton:checked { background: #5b8cff; color: #ffffff; }
+
+/* ---------- Mensajes: el estado lo pone paint()/set_state() ---------- */
+
+QLabel[state="error"]   { color: #ff6b6b; }
+QLabel[state="success"] { color: #3ecf8e; }
+QLabel[state="warning"] { color: #f5a524; }
+QLabel[state="muted"]   { color: #8a90a0; }
+
+/* ---------- Ventana principal ---------- */
+
+QFrame#sidePanel {
+    background: #20232b;
+    border-right: 1px solid #2e323c;
+}
+QFrame#sidePanel QLabel, QFrame#sidePanel QListWidget { background: transparent; }
+QLabel#sidebarUser { font-weight: 600; padding: 4px 8px 12px 8px; }
+
+QListWidget#sidebar { border: none; outline: none; }
+QListWidget#sidebar::item {
+    padding: 10px 12px;
+    border-radius: 8px;
+    margin: 2px 0;
+}
+QListWidget#sidebar::item:hover { background: #2a2e37; }
+QListWidget#sidebar::item:selected { background: #5b8cff; color: #ffffff; }
+
+QPushButton#logoutButton { background: transparent; border: 1px solid #2e323c; color: #8a90a0; }
+QPushButton#logoutButton:hover { color: #ff6b6b; border-color: #ff6b6b; }
+
+QLabel#sectionTitle { font-size: 22px; font-weight: 600; padding-bottom: 4px; }
+QLabel#details {
+    background: #20232b;
+    border: 1px solid #2e323c;
+    border-radius: 8px;
+    padding: 12px;
+}
+
+/* ---------- Tabla de cuentas ---------- */
+
+QTableWidget {
+    background: #16181d;
+    alternate-background-color: #1b1e24;
+    border: 1px solid #2e323c;
+    border-radius: 8px;
+    gridline-color: #2e323c;
+    selection-background-color: #2a3550;
+    selection-color: #e7e9ee;
+}
+QWidget#cellActions { background: transparent; }
+QHeaderView::section {
+    background: #20232b;
+    color: #8a90a0;
+    border: none;
+    border-bottom: 1px solid #2e323c;
+    padding: 8px;
+    font-weight: 600;
+}
+
+/* ---------- Otros ---------- */
+
+QCheckBox { spacing: 8px; }
+QSlider::groove:horizontal { height: 4px; background: #2e323c; border-radius: 2px; }
+QSlider::handle:horizontal {
+    background: #5b8cff;
+    width: 14px;
+    margin: -6px 0;
+    border-radius: 7px;
+}
+QSlider::sub-page:horizontal { background: #5b8cff; border-radius: 2px; }
+
+QScrollBar:vertical { background: transparent; width: 10px; }
+QScrollBar::handle:vertical { background: #2e323c; border-radius: 5px; min-height: 24px; }
+QScrollBar::add-line, QScrollBar::sub-line { height: 0; }
+
+QMessageBox { background: #20232b; }

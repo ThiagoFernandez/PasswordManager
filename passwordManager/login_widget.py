@@ -1,5 +1,6 @@
 from PySide6 import QtWidgets, QtCore
 import core
+from sections.base import paint
 import exceptions
 
 
@@ -14,6 +15,7 @@ class LoginWidget(QtWidgets.QWidget):
         self.vault = vault
 
         self.button_login = QtWidgets.QPushButton("Login")
+        self.button_login.setObjectName("primaryButton")
         self.button_login.clicked.connect(self.login)
 
         self.button_register = QtWidgets.QPushButton("Register")
@@ -58,16 +60,16 @@ class LoginWidget(QtWidgets.QWidget):
             self._show_error(f"Error: {e}")
 
         else:
-            self.label_error.setStyleSheet("color: green;")
+            paint(self.label_error, "success")
             self.label_error.setText("OK")
             self.login_successful.emit(user_login)
 
     def _show_error(self, text):
-        self.label_error.setStyleSheet("color: red;")
+        paint(self.label_error, "error")
         self.label_error.setText(text)
         self.lineedit_password.clear()
-
-    def refresh_users(self):
+        
+    def refresh_users(self, select=None):
         self.combobox_users.clear()
         self.combobox_users.addItems(self.vault.list_users())
 
@@ -75,9 +77,24 @@ class LoginWidget(QtWidgets.QWidget):
 
         self.button_login.setEnabled(has_users)
         self.lineedit_password.setEnabled(has_users)
+        self.lineedit_password.clear()
 
-        if has_users:
-            self.label_error.clear()
-        else:
-            self.label_error.setStyleSheet("color: red;")
-            self.label_error.setText("No users registered.")
+        if not has_users:
+            self._show_error("No users yet. Register one first.")
+            return
+
+        self.clear_message()
+
+        if select is not None:
+            index = self.combobox_users.findText(select)
+            if index >= 0:
+                self.combobox_users.setCurrentIndex(index)
+
+    def clear_message(self):
+        self.label_error.clear()
+        paint(self.label_error, "")
+
+    def show_notice(self, text):
+        # mensaje que viene de afuera (ej. sesión expirada); va después de refresh_users
+        paint(self.label_error, "warning")
+        self.label_error.setText(text)
